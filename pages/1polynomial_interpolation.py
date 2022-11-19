@@ -89,8 +89,8 @@ print(x)
     with st.expander("I/O"):
         x_values=st.text_input("Enter your x values(separated by comma)",'3,5,7')
         y_values=st.text_input("Enter your y values(separated by comma)",'32,74,132')
-        x=list(map(int,re.findall(r'\d+', x_values)))
-        y=list(map(int,re.findall(r'\d+', y_values)))
+        x=list(map(int,re.findall(r'-?\d*\.{0,1}\d+', x_values)))
+        y=list(map(int,re.findall(r'-?\d*\.{0,1}\d+', y_values)))
         if len(x)==len(y) and len(x)!=0:
             co1,co2,co3,co4=st.columns((1,1,2,2))
             with co1:
@@ -139,8 +139,8 @@ f = lagrange(x, y)'''
         with cl1:
             x_vals=st.text_input("Enter your x values(separated by comma)",key=5)
             y_vals=st.text_input("Enter your y values(separated by comma)",key=6)
-            x=list(map(int,re.findall(r'\d+', x_vals)))
-            y=list(map(int,re.findall(r'\d+', y_vals)))
+            x=list(map(int,re.findall(r'-?\d*\.{0,1}\d+', x_vals)))
+            y=list(map(int,re.findall(r'-?\d*\.{0,1}\d+', y_vals)))
             number = st.number_input('Enter a number for x',step=0.01)
             st.write('The current x is ', number)
         with cl2:
@@ -195,8 +195,8 @@ def newton_polynomial(x_data, y_data, x):
         with cl3:
             x_vals=st.text_input("Enter your x values(separated by comma)",key=3)
             y_vals=st.text_input("Enter your y values(separated by comma)",key=4)
-            x=list(map(int,re.findall(r'\d+', x_vals)))
-            y=list(map(int,re.findall(r'\d+', y_vals)))
+            x=list(map(int,re.findall(r'-?\d*\.{0,1}\d+', x_vals)))
+            y=list(map(int,re.findall(r'-?\d*\.{0,1}\d+', y_vals)))
             num = st.number_input('Enter a number for x',step=0.02)
             st.write('The current x is ', num)
         def _poly_newton_coefficient(x, y):    

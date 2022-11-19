@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import re
 from scipy.linalg import lu
+from PIL import Image
 
 st.sidebar.markdown("### Linear algebra")
 
@@ -18,9 +19,9 @@ with tb1:
 ### matrix norm
 * A is m by n matrix
 * $||A||_2=\sqrt{\rho (A^TA)}$  where $\rho (B)$ is the largest eigenvalue of B in absolute value
-* $||A||_1=max_{1 \le j \le n} \sum_{i=1}^{m}|a_{ij}|$
+* $||A||_1=max_{1 \le j \le n} \sum_{i=1}^{m}|a_{ij}|$; $||A||_1$ is the maximum column sum
 * $||A||_p=\sqrt[p]{\sum_{i}^{m}\sum_{j}^{n}|a_{ij}|^p}$ where A is a mXn matrix
-* $||A||_{\infty}=max_{1 \le i \le m} \sum_{j=1}^{n}|a_{ij}|$
+* $||A||_{\infty}=max_{1 \le i \le m} \sum_{j=1}^{n}|a_{ij}|$; $||A||_{\infty}$ is the maximum row sum
 
 ''')
     with st.expander("Norm Calculator"):
@@ -28,7 +29,8 @@ with tb1:
         with column1:
             st.markdown("Vector norm")
             input1=st.text_input("Enter your vector(separated by commas)")
-            x=list(map(int,re.findall(r'\d+', input1)))
+            x=list(map(float,re.findall(r'-?\d*\.{0,1}\d+', input1)))
+            st.write(x)
             option = st.selectbox('What type of norm you want to calculate?',
     ('inf', 1, 2,'-inf'))
             if st.button("click here to compute the vector norm"):
@@ -46,7 +48,7 @@ with tb1:
             txt_ls=inp2.splitlines()
             A=[]
             for i in txt_ls:
-                rows=list(map(int,re.findall(r'\d+',i)))
+                rows=list(map(float,re.findall(r'-?\d*\.{0,1}\d+',i)))
                 if len(rows)!=0:
                     A.append(rows)
             opt=st.selectbox("What matrix norm you want to compute?",('inf', 1, 2,'-inf','Frobenius'))
@@ -144,10 +146,10 @@ print('LU:',np.dot(L, U))'''
             txt_ls=inp2.splitlines()
             A=[]
             for i in txt_ls:
-                rows=list(map(float,re.findall(r'-?\d+',i)))
+                rows=list(map(float,re.findall(r'-?\d*\.{0,1}\d+',i)))
                 if len(rows)!=0:
                     A.append(rows) 
-       
+            st.write(A)
             opt=st.selectbox("What type of condition number you want to compute?",('inf', 1, 2,'-inf','Frobenius'),key=3)
             if st.button("click here to compute condition number"):
                 if opt==1 or opt==2:
@@ -204,6 +206,120 @@ print('LU:',np.dot(L, U))'''
     x=np.linalg.solve(R,Q.T@b)
     return x'''
             st.code(codes_qr,language='python')
-            
-            
+            t_gram,t_householder=st.tabs(['Gram-Schmidt','Householder reflector'])
+            with t_gram:
+                st.markdown(r'''
+                Suppose $v \in V$, an inner-product space, and assume that a subspace $S \subset V$ has a basis of n mutually orthogonal vectors $v_1,v_2,...,v_n$. Then the unique vector $u \in S$ closest to v is
+                $u=\sum_{i=1}^{n}\frac{(v \cdot v_i)}{v_i \cdot v_i}v_i$.
+                ''')
+                st.markdown(r'''
+                Gram-Schmidt Algorithm can be used to factor A=QR, where Q is the orthogornal and R is upper triangular. It works as follow:
+                * Take one column $v_i$ of A at a time starting with the leftmost first
+                * Find $v_i^{\perp}=v_i-v_i^{||}=v_i-(v_{k-1}^{T}v_i)v_{k-1}$ by subtracting the pareallel part to the span of all previous columns
+                * normalize $u_i=\frac{v_i^{v_i}}{v_i}$''')
+                codes_gram='''def QR_Decomposition(A):
+    n, m = A.shape # get the shape of A
 
+    Q = np.empty((n, n)) # initialize matrix Q
+    u = np.empty((n, n)) # initialize matrix u
+
+    u[:, 0] = A[:, 0]
+    Q[:, 0] = u[:, 0] / np.linalg.norm(u[:, 0])
+
+    for i in range(1, n):
+
+        u[:, i] = A[:, i]
+        for j in range(i):
+            u[:, i] -= (A[:, i] @ Q[:, j]) * Q[:, j] # get each u vector
+
+        Q[:, i] = u[:, i] / np.linalg.norm(u[:, i]) # compute each e vetor
+
+    R = np.zeros((n, m))
+    for i in range(n):
+        for j in range(i, m):
+            R[i, j] = A[:, j] @ Q[:, i]
+
+    return Q,R'''
+                st.code(codes_gram,language='python')
+            
+            with t_householder:
+                img=Image.open('pages/Householder.png')
+                st.image(img,caption="Householder reflectors")
+                st.markdown(r'''
+                Let v and w be vectors with $||v||=||w||$ and $a=v-w$. Then $H=I-2P=I-2\frac{aa^T}{a^Ta}$ is symmetric orthogonal and $Hw=v$.''')
+    with st.expander("Iterative methods"):
+        st.markdown('''
+        There is a need for iterative methods because Gaussian Elimination can be expensive. Sometimes we do not need to sovle the problem exactly but have a good approximate solution.
+        * Split $A=M-N$
+        * Rewrite $Ax=b$ as $(M-N)x=b \implies Mx=Nx+b$
+        * Rewrite as Fixed Point Iteration: $x_{k+1}=M^{-1}Nx_k+M^{-1}b=M^{-1}(M-A)x_k+M^{-1}b=x_k+M^{-1}(b-Ax_k)$
+        * $g(x)=x+M^{-1}(b-Ax)=x+M^{-1}r$ where r is the residual''')
+        st.markdown(r'''
+        There are many ways to split $A=M-N$:
+        1. **Jacobi method**: M=D, the diagonal of A
+        2. **Gauss-Seidal method**: M=E, the lower triangular part of A
+        3. **Successive over_relaxation**(SOR): a mix of Jacobi and Gauss-Seidel''')
+        codes_Jacobi='''def Jacobi(A,b,x0,iterations):
+    D=np.diag(np.diag(A),0)
+    M_inv=np.linalg.inv(D)
+    for i in range(iterations):
+        r=b-A@x0
+        x0=x0+M_inv@r
+        print("k=",i+1,":x=",x0)
+    return x0'''
+        st.code(codes_Jacobi,language='python')
+        codes_GS='''def Gauss_seidal(A,b,x0,iterations):
+    m,n=A.shape
+    E=np.zeros((m,n))
+    for i in range(m):
+        for j in range(i+1):
+            E[i][j]=A[i][j]
+    M_inv=np.linalg.inv(E)
+    
+    for i in range(iterations):
+        r=b-A@x0
+        x0=x0+M_inv@r
+        print("k=",i+1,":x=",x0)
+    return x0'''
+        st.code(codes_GS,language='python')
+    
+        inp2=st.text_area("Enter your matrix A(separate elements by commas and rows by entering a new line)",key=7)
+        txt_ls=inp2.splitlines()
+        A=[]
+        for i in txt_ls:
+            rows=list(map(float,re.findall(r'-?\d*\.{0,1}\d+',i)))
+            if len(rows)!=0:
+                A.append(rows)
+        input1=st.text_input("Enter your b vector(separate by commas)",key=6)
+        b=list(map(float,re.findall(r'-?\d*\.{0,1}\d+', input1)))
+        input3=st.text_input("Enter your initial guess(separated by commas)",key=9)
+        x0=list(map(float,re.findall(r'-?\d*\.{0,1}\d+', input3)))
+        n_iter= st.slider('The number of iterations', min_value=0, max_value=30, step=1)
+        cl_j,cl_gs=st.columns(2)
+        x0_new=[i for i in x0]
+        if st.button("Click here to start the program"):
+            with cl_j:
+                st.markdown("Jacobi Method")
+                D=np.diag(np.diag(A),0)
+                M_inv=np.linalg.inv(D)
+                for i in range(n_iter):
+                    r=b-np.matmul(A,x0)
+                    x0=x0+np.matmul(M_inv,r)
+                    st.write("k=",i+1,":x=",x0)
+           
+            with cl_gs:
+                st.markdown("Gauss_Seidal")
+                
+                m,n=len(A),len(A[0])
+                E=np.zeros((m,n))
+                for i in range(m):
+                    for j in range(i+1):
+                        E[i][j]=A[i][j]
+                M_inv=np.linalg.inv(E)
+
+                for i in range(n_iter):
+                    r=b-np.matmul(A,x0_new)
+                    x0_new=x0_new+np.matmul(M_inv,r)
+                    st.write("k=",i+1,":x=",x0_new)
+with tb3:
+    st.markdown("Hello")      
