@@ -7,7 +7,7 @@ from PIL import Image
 
 st.sidebar.markdown("### Linear algebra")
 
-tb1,tb2,tb3=st.tabs(['Norms','Solve Ax=b','Other'])
+tb1,tb2,tb3=st.tabs(['Norms','Solve Ax=b','Fourier Series'])
  
 with tb1:
     st.sidebar.markdown("#### Norms")
@@ -322,4 +322,16 @@ print('LU:',np.dot(L, U))'''
                     x0_new=x0_new+np.matmul(M_inv,r)
                     st.write("k=",i+1,":x=",x0_new)
 with tb3:
-    st.markdown("Hello")      
+    st.markdown(r'''
+    
+    In the early part of the 19th century, Fourier asserted that any $2\pi$-periodic function f(x) could be represented as an infinite series of trigonometric functions of the form
+    
+    $A_0+\sum_{k=1}^{\infty}(a_kcoskx+b_ksinkx)$ with
+    
+    $A_0=\frac{1}{2\pi}\int_{-\pi}^{\pi}f(x)dx$; 
+    $a_j=\frac{1}{\pi}\int_{-\pi}^{\pi}f(x)cosjxdx$;
+    $b_j=\frac{1}{\pi}\int_{-\pi}^{\pi}f(x)sinjxdx$.
+    
+    Instead decomposing a function using the Taylor series, we can express some complicated functions as the infinite sum of sine and cosine waves using Fourier's idea. The Fourier method has many applications in engineering and science, such as signal processing, partial differential equations, and image processing.
+    
+    Note that {$1,cosx,cos2x,...,sinx,sin2x$} forms an orthogonal set, with the inner product $f\circ g$ defined as $\int_{-\pi}^{\pi} f(x)g(x)dx$. To prove the orthogonality, note that $\int_{-\pi}^{\pi}cosjxdx=\int_{-\pi}^{\pi}sinjxdx=0$ for all $j\ge 1$.''')      

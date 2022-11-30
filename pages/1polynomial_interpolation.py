@@ -92,7 +92,7 @@ b=np.array([32,74,132])
 x = np.linalg.solve(A, b)
 print(x)
         '''
-        st.code(code,language='Python')
+        st.code(code,language='python')
         st.markdown("Solving the linear system of equations will yield $c_0=-1,c_1=5,c_2=2.$")
 
         st.markdown('''**Food for Thought**: Can you always find a unique solution to the system of equations?''')
@@ -273,12 +273,12 @@ with tab5:
 
     with st.expander('''Numerical Integration'''):
         int1,int2=st.columns(2)
-        with int1:
-            img_r=Image.open('Riemann.jpg')
-            st.image(img_r,caption="Riemann Sum")
-        with int2:
-            img_s=Image.open('Simpson.png')
-            st.image(img_s,caption="Simpson's Rule")
+        # with int1:
+        #     img_r=Image.open('Riemann.jpg')
+        #     st.image(img_r,caption="Riemann Sum")
+        # with int2:
+        #     img_s=Image.open('Simpson.png')
+        #     st.image(img_s,caption="Simpson's Rule")
         st.markdown('''In practice, finding an exact solution for the integral of a function is difficult or impossible. Instead, we seek approximations of the definite integral for a given finite interval [a,b] and the function f.''')
         st.latex(r''' \int_{x=a}^{x=b} f(x)dx\approx \sum_{j=1}^{n}a_jf(x_j)''')
         st.markdown('''
@@ -318,19 +318,30 @@ def Riemann_sum(f_circle,a,b,n):
                      
   return left, right, midpoint
 Riemann_sum(f_circle,0,np.pi,10)'''
-        st.code(codes_Riemann,language='Python')
+        st.code(codes_Riemann,language='python')
 
         st.markdown(r'''
         2. **Trapezoid Rule**:
-        $\int_{x=a}^{x=b} f(x)dx\approx \frac{h}{2}(f(x_0)+2f(x_1)+2f(x_2)+...+2f(x_{n-1})+f(x_n))$
+        **Trapezoid Rule**: $\int_{x=a}^{x=b} f(x)dx\approx \frac{h}{2}(f(x_0)+2f(x_1)-\frac{h^3}{12}f''(\xi)$ where $h=x_1-x_0$
+
+        **Composite Trapezoid Rule**: $\int_{x=a}^{x=b} f(x)dx\approx \frac{h}{2}(f(x_0)+2f(x_1)+2f(x_2)+...+2f(x_{n-1})+f(x_n))$
 
         Error: $-\frac{1}{12}f''(\xi)(b-a)h^2$
 
         3. **Simpson's Rule**:
-        $\int_{x=a}^{x=b} f(x)dx\approx \frac{h}{3}[f(x_0)+4f(x_1)+2f(x_2)+4f(x_3)+2f(x_4)+...+f(x_n)]$
+        **Simpson's Rule**: $\int_{x=a}^{x=b} f(x)dx\approx \frac{h}{3}[f(x_0)+4f(x_1)+f(x_2)]-\frac{h^5}{90}f^{(4)}(\xi)$
+
+        **Composite Simpson's Rule**:$\int_{x=a}^{x=b} f(x)dx\approx \frac{h}{3}[f(x_0)+4f(x_1)+2f(x_2)+4f(x_3)+2f(x_4)+...+f(x_n)]$
         
         Error: $-\frac{h^4(b-a)}{180}f^{(4)}(\xi)$''')
-
-
+        codes_int='''import scipy.integrate as integrate
+import numpy as np
+#integrate sin(x) from 0 to pi
+def integrand(x):
+  return np.sin(x)
+area,error=integrate.quad(integrand,a=0,b=np.pi)
+print("area under the curve:",area)
+print("estimate of absolute error:",error)'''
+        st.code(codes_int,language='python')
 
 
