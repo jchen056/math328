@@ -13,7 +13,7 @@ tab1, tab2, tab3,tab4,tab5=st.tabs(["Overview", "Monomial interpolation", "Lagra
 with tab1:
     st.markdown('''### Interpolation Problem Statement''')
     st.markdown('''
-    > Given a set of data points($x_i,y_i$), we want to find a n-th degree polynomial $P_n(x)=c_0+c_1x+...+c_nx^n$ that goes through our data points. 
+    > Given a set of data points($x_i,y_i$), we want to find a n-th degree polynomial $P_n(x)=c_0\phi_0+c_1\phi_1+...+c_n\phi_n$ that goes through our data points. 
     
     ### Applications
     * **Data fitting** (discrete): given data($x_i,y_i$),find a reasonable function v(x) that fits the data.
@@ -22,15 +22,20 @@ with tab1:
     ### Different polynomial interpolation
     1. **Monomial interpolation**: $P_n(x)=c_0+c_1x+...+c_nx^n$
     1. **Lagrange Interpolation**: $P_n(x)=y_0L_0(x)+...+y_nL_n(x)$
-    1. **Newton's**: $P_n(x)=c_0+c_1(x-x_0)+c_2(x-x_0)(x-x_1)+...+c_n(x-x_0)(x-x_1)...(x-x_{n-1})$''')
+    1. **Newton's**: $P_n(x)=c_0+c_1(x-x_0)+c_2(x-x_0)(x-x_1)+...+c_n(x-x_0)(x-x_1)...(x-x_{n-1})$
+    
+    Monomial is simple but suffers when the Vandermonde matrix is ill-conditioned. Lagrange is the most stable but it is not adaptive; when a new data point is added, you have to start over your computation. Newton's is adaptive. ''')
 
     st.markdown(r'''
     ### Polynomial Interpolation Error
     
-    The error in the **Taylor polynomial**: 
+    The error in the **Taylor polynomial** (only works for intepolation, not for extrapolation): 
     * $P(x)=\sum_{k=0}^{n} \frac{f^{(k)}(x_0)}{k!}(x-x_0)^k$
-    * $f(x)-P(x)=\frac{f^{n+1}(\xi)}{(n+1)!}(x-x_0)(x-x_1)...(x-x_n)$
+    * $f(x)-P_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}(x-x_0)(x-x_1)...(x-x_n)$
+    * We have error bound $\max_{a \le x \le b}|f(x)-P_n(x)|\le \frac{1}{(n+1)!}\max_{a\le t \le b}|f^{n+1}(t)|\max_{a\le s\le b}|s-x_i|$.
     
+    In reality, $f^{(n+1)}(\xi)$ is hard to compute given the data points. Even if the function f(x) is given, finding its derivative can be a headache.
+
     It is not true that higher degree will lead to higher accuracy. Low order approximations are often reasonable. High-degree interpolants, on the other hand, are expensive to compute and can be poorly behaved.''')
 
 
@@ -267,7 +272,14 @@ with tab5:
         st.latex(r'''f'(x_0)=\frac{1}{12h}*[f(x_0-2h)-8f(x_0-h)+8(x_0+h)-f(x_0+2h)]+\frac{h^4}{30}f^{(4)}(\xi)''')
 
     with st.expander('''Numerical Integration'''):
-        st.markdown('''We seek approximations of the definite integral for a given finite interval[a,b] and integrable function f.''')
+        int1,int2=st.columns(2)
+        with int1:
+            img_r=Image.open('Riemann.jpg')
+            st.image(img_r,caption="Riemann Sum")
+        with int2:
+            img_s=Image.open('Simpson.png')
+            st.image(img_s,caption="Simpson's Rule")
+        st.markdown('''In practice, finding an exact solution for the integral of a function is difficult or impossible. Instead, we seek approximations of the definite integral for a given finite interval [a,b] and the function f.''')
         st.latex(r''' \int_{x=a}^{x=b} f(x)dx\approx \sum_{j=1}^{n}a_jf(x_j)''')
         st.markdown('''
         The numerical integration formula, often referred to as a **quadrature rule**, has abscissae $x_j$ and weights $a_j$.
@@ -275,14 +287,50 @@ with tab5:
         Using polynomial intepolation, we have:''')
         st.latex(r''' \int_{x=a}^{x=b} f(x)dx\approx \int_{x=a}^{x=b} P_n(x)dx''')
         st.markdown(r'''
-        1. **Trapezoid Rule**:
+        Using the Lagrange interpolating polynomial, we have 
+        
+        $\int_{x=a}^{x=b} f(x)dx\approx \int_{x=a}^{x=b} \sum_{a}^{b} f(x_i)L_i(x)dx+\int_{x=a}^{x=b}\frac{f^{(n+1)}(\xi)}{(n+1)!}\prod_{i=0}^{n}(x-x_i)dx$
+        
+        $=\int_{a}^{b} f(x)dx\approx \int_{a}^{b} a_if(x_i)+\int_{x=a}^{x=b}\frac{f^{(n+1)}(\xi)}{(n+1)!}\prod_{i=0}^{n}(x-x_i)dx$''')
+        st.markdown(r'''
+        Suppose we have n strips and n+1 points. $h=x_{i+1}-x_i=\frac{b-a}{n}$
+        1. **Riemann Integral**
+        $\int_{x=a}^{x=b} f(x)dx\approx \sum_{i=0}^{n-1}hf(x_i)$ (left-endpoint)
+
+        $\int_{x=a}^{x=b} f(x)dx\approx \sum_{i=1}^{n}hf(x_i)$ (right-endpoint)
+
+        $\int_{x=a}^{x=b} f(x)dx\approx \sum_{i=0}^{n-1}hf(y_i)$ where $y_i=\frac{x_i+x_{i+1}}{2}$ (midpoint)''')
+        codes_Riemann='''#compute the area under the curve f(x) on [a,b] using numerical integration
+def f_circle(x):
+  return np.sin(x)
+
+#[a,b] is your interval; n is the number of strips
+
+def Riemann_sum(f_circle,a,b,n):
+  h=(b-a)/n #stepsize
+  x_values=np.arange(start=a,stop=b+h,step=h)
+  y_values=[f_circle(i) for i in x_values]
+  left=h*np.sum(y_values[0:-1])
+  right=h*np.sum(y_values[1:])
+
+  x_midpoints=(x_values[0:-1]+x_values[1:])/2
+  midpoint=h*(np.sum(f_circle(i) for i in x_midpoints))
+                     
+  return left, right, midpoint
+Riemann_sum(f_circle,0,np.pi,10)'''
+        st.code(codes_Riemann,language='Python')
+
+        st.markdown(r'''
+        2. **Trapezoid Rule**:
         $\int_{x=a}^{x=b} f(x)dx\approx \frac{h}{2}(f(x_0)+2f(x_1)+2f(x_2)+...+2f(x_{n-1})+f(x_n))$
 
         Error: $-\frac{1}{12}f''(\xi)(b-a)h^2$
 
-        2. **Simpson's Rule**:
+        3. **Simpson's Rule**:
         $\int_{x=a}^{x=b} f(x)dx\approx \frac{h}{3}[f(x_0)+4f(x_1)+2f(x_2)+4f(x_3)+2f(x_4)+...+f(x_n)]$
         
         Error: $-\frac{h^4(b-a)}{180}f^{(4)}(\xi)$''')
+
+
 
 
