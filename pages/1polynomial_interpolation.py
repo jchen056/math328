@@ -8,7 +8,7 @@ from scipy.interpolate import lagrange
 from PIL import Image
 st.sidebar.markdown("# Polynomial Interpolation")
 
-tab1, tab2, tab3,tab4=st.tabs(["Overview", "Monomial interpolation", "Lagrange","Newton"])
+tab1, tab2, tab3,tab4,tab5=st.tabs(["Overview", "Monomial interpolation", "Lagrange","Newton","Applications"])
 
 with tab1:
     st.markdown('''### Interpolation Problem Statement''')
@@ -23,6 +23,16 @@ with tab1:
     1. **Monomial interpolation**: $P_n(x)=c_0+c_1x+...+c_nx^n$
     1. **Lagrange Interpolation**: $P_n(x)=y_0L_0(x)+...+y_nL_n(x)$
     1. **Newton's**: $P_n(x)=c_0+c_1(x-x_0)+c_2(x-x_0)(x-x_1)+...+c_n(x-x_0)(x-x_1)...(x-x_{n-1})$''')
+
+    st.markdown(r'''
+    ### Polynomial Interpolation Error
+    
+    The error in the **Taylor polynomial**: 
+    * $P(x)=\sum_{k=0}^{n} \frac{f^{(k)}(x_0)}{k!}(x-x_0)^k$
+    * $f(x)-P(x)=\frac{f^{n+1}(\xi)}{(n+1)!}(x-x_0)(x-x_1)...(x-x_n)$
+    
+    It is not true that higher degree will lead to higher accuracy. Low order approximations are often reasonable. High-degree interpolants, on the other hand, are expensive to compute and can be poorly behaved.''')
+
 
 with tab2:
     st.markdown('''
@@ -79,6 +89,24 @@ print(x)
         '''
         st.code(code,language='Python')
         st.markdown("Solving the linear system of equations will yield $c_0=-1,c_1=5,c_2=2.$")
+
+        st.markdown('''**Food for Thought**: Can you always find a unique solution to the system of equations?''')
+        st.markdown('''Trying to find the nullspace for the Vandermonde matrix in our simple example, we have''')
+        st.latex(r'''\begin{pmatrix}
+            1 & 3 & 9 \\
+            1 & 5 & 25 \\
+            1 & 7 & 49
+            \end{pmatrix}  \begin{pmatrix}
+            c_0 \\
+            c_1 \\
+            c_2
+            \end{pmatrix} = \begin{pmatrix}
+            0 \\
+            0 \\
+            0
+            \end{pmatrix}''')
+        st.markdown(r'''We will get $c_0=0, c_1=0,c_2=0$ because a quadratic function has either no roots or two roots.''')
+        st.markdown('''Therefore, **Nullity** of our Vandermonde matrix is 0 and **rank** of our our Vandermonde matrix will be the number of independent columns. Thus, our Vandermonde matrix is **nonsingular** and we have a unique solution.''')
     
     with st.expander("Pros and Cons of Monomial Interpolation"):
         st.markdown(r'''
@@ -227,3 +255,34 @@ def newton_polynomial(x_data, y_data, x):
                 st.error("please enter some input")
             else:
                 st.error("len(x) and len(y) not equal")
+
+with tab5:
+    st.markdown('''As mentioned previously, polynomial interpolation are the building blocks for more complex algorithms in differentiation, integration, and solutions of differential equations.''')
+    with st.expander("Numerical Differentiation"):
+        st.markdown('''* Two-point formula:''')
+        st.latex(r'''f'(x_0)=\frac{f(x_0+h)-f(x_0)}{h}+\frac{h}{2}f''(\xi)''')
+        st.markdown('''* Three-point midpoint formula:''')
+        st.latex(r'''f'(x_0)=\frac{f(x_0+h)-f(x_0-h)}{2h}+\frac{h^2}{6}f^{(3)}(\xi)''')
+        st.markdown('''* Five-point midpoint formula''')
+        st.latex(r'''f'(x_0)=\frac{1}{12h}*[f(x_0-2h)-8f(x_0-h)+8(x_0+h)-f(x_0+2h)]+\frac{h^4}{30}f^{(4)}(\xi)''')
+
+    with st.expander('''Numerical Integration'''):
+        st.markdown('''We seek approximations of the definite integral for a given finite interval[a,b] and integrable function f.''')
+        st.latex(r''' \int_{x=a}^{x=b} f(x)dx\approx \sum_{j=1}^{n}a_jf(x_j)''')
+        st.markdown('''
+        The numerical integration formula, often referred to as a **quadrature rule**, has abscissae $x_j$ and weights $a_j$.
+        
+        Using polynomial intepolation, we have:''')
+        st.latex(r''' \int_{x=a}^{x=b} f(x)dx\approx \int_{x=a}^{x=b} P_n(x)dx''')
+        st.markdown(r'''
+        1. **Trapezoid Rule**:
+        $\int_{x=a}^{x=b} f(x)dx\approx \frac{h}{2}(f(x_0)+2f(x_1)+2f(x_2)+...+2f(x_{n-1})+f(x_n))$
+
+        Error: $-\frac{1}{12}f''(\xi)(b-a)h^2$
+
+        2. **Simpson's Rule**:
+        $\int_{x=a}^{x=b} f(x)dx\approx \frac{h}{3}[f(x_0)+4f(x_1)+2f(x_2)+4f(x_3)+2f(x_4)+...+f(x_n)]$
+        
+        Error: $-\frac{h^4(b-a)}{180}f^{(4)}(\xi)$''')
+
+
