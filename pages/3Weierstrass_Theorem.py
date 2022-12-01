@@ -91,3 +91,34 @@ to conjecture that $(B_nf)(x)$, the expected value of Z, should approach f(x) as
        For this $\delta$, we can choose $n_0$ large enough so that $\frac{2M}{{\delta}^2n}\le \frac{\epsilon}{2} when n\ge n_0$. For such an n and the given x,
        $|B_n(f)-f(x)|\le \Sigma'+\Sigma''<\frac{\epsilon}{2}+\frac{\epsilon}{2}=\epsilon$. Hence, $B_nf(x)\to f(x)$ as $n\to \infty$ 
        for each point x of continuity of the function f.''')
+    with st.expander("Orthogonal Polynomials"):
+        st.markdown(r'''
+        **Orthogonal polynomials** are polynomial functions that have the particular property that a particular definite integral of any two different ones of them is zero.
+        
+         $\int_{a}^{b}P_i(x)P_j(x)dx=c_j\delta_{ij}$ where $c_i$=1 if the polynomials are normalized and $\delta_{ij}=1$ if i=j and  $\delta_{ij}=0$ if $i \ne j$. 
+         ''')
+        
+        st.markdown(r'''{$\phi_0, \phi_1, ..., \phi_n$} is said to be an orthogonal set of functions for the interval [a,b]
+        with respect to the weight function if $\int_{a}^{b} w(x)\phi_k(x)\phi_j(x)=0$ when $j\ne k$ and $\int_{a}^{b} w(x)\phi_k(x)\phi_j(x)=a_j$ when $j=k$.''')
+    with st.expander("Chebyshev Polynomial"):
+        st.markdown(r'''
+        The **Chebyshev polynomials** are two sequences of polynomials related to the cosine and sine functions, notated as $T_n(x)$ and $U_n(x)$.
+        
+        The Chebyshev polynomials of the first kind, {$T_n(x)$}, are orthogonal on (-1,1) with respect to the respect to the weight function $w(x)=(1-x^2)^{-\frac{1}{2}}$.
+        For $x\in [-1,1]$, define $T_n(x)=cos(ncos^{-1}x)$ for $n\ge 0$.
+
+        For n=0, $T_0(x)=\cos(0)=1$.
+        
+        For n=1, $T_1(x)=\cos(\cos^{-1}x)=x$.
+
+        ...
+
+        For n+1, $T_{n+1}=2xT_n(x)-T_{n-1}(x)$.
+        ''')
+    with st.expander("Legendre Polynomials"):
+        st.markdown(r'''
+        The nth degree **Legendre polynomial** is defined as $L_n(x)=\frac{1}{2^nn!}D^n[(x^2-1)^n]$. 
+
+        For example, $L_0(x)=1; L_1(x)=x; L_2(x)=\frac{3x^2-1}{2}$.
+         
+        The set of Legendre polynomials, {$P_n(x)$}, is orthogonal on [-1,1] with respect to the weight functions w(x)=1.''')
