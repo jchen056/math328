@@ -267,9 +267,9 @@ with tab5:
         st.markdown('''* Two-point formula:''')
         st.latex(r'''f'(x_0)=\frac{f(x_0+h)-f(x_0)}{h}+\frac{h}{2}f''(\xi)''')
         st.markdown('''* Three-point midpoint formula:''')
-        st.latex(r'''f'(x_0)=\frac{f(x_0+h)-f(x_0-h)}{2h}+\frac{h^2}{6}f^{(3)}(\xi)''')
+        st.latex(r'''f'(x_0)=\frac{f(x_0+h)-f(x_0-h)}{2h}-\frac{h^2}{6}f^{(3)}(\xi)''')
         st.markdown('''* Five-point midpoint formula''')
-        st.latex(r'''f'(x_0)=\frac{1}{12h}*[f(x_0-2h)-8f(x_0-h)+8(x_0+h)-f(x_0+2h)]+\frac{h^4}{30}f^{(4)}(\xi)''')
+        st.latex(r'''f'(x_0)=\frac{1}{12h}*[f(x_0-2h)-8f(x_0-h)+8(x_0+h)-f(x_0+2h)]+\frac{h^4}{30}f^{(5)}(\xi)''')
 
     with st.expander('''Numerical Integration'''):
         int1,int2=st.columns(2)
@@ -343,5 +343,35 @@ area,error=integrate.quad(integrand,a=0,b=np.pi)
 print("area under the curve:",area)
 print("estimate of absolute error:",error)'''
         st.code(codes_int,language='python')
+
+        codes_comp='''def func(x):
+    return 3*math.sqrt(x)
+
+def composite_rieman(a,b,n):
+    h=(b-a)/n
+    x=np.arange(start=a,stop=b+h,step=h)
+    #midpoint formula: approx 
+    midpoints=(np.array([i for i in x[0:-1]])+np.array([i for i in x[1:]]))/2
+    midpoint_est=np.sum([func(i) for i in midpoints])*h
+    
+    #trapezoidal formula: 1 2 2 ... 2 2 1
+    trapezoidal_sum=( np.sum([func(i) for i in x[0:-1]])+
+                             np.sum([func(i) for i in x[1:]])
+                             )*h/2
+    
+    #simpson formula: 1 4 2 4 2...1
+    simpson_xs=np.ones(n+1)
+    for i in range(1,n):
+        if i%2==0:
+            simpson_xs[i]=2
+        else:
+            simpson_xs[i]=4
+#     print(simpson_xs)
+    simpson_sum=np.dot(simpson_xs,np.array([func(i) for i in x]))*h/3
+    
+    #exact answer
+    exact_int=integrate.quad(func,a=a,b=b)[0]
+    return midpoint_est,trapezoidal_sum,simpson_sum,exact_int'''
+        st.code(codes_comp,language='python')
 
 
